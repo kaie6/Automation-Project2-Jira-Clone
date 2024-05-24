@@ -6,6 +6,34 @@ const issueTitle = 'textarea[placeholder="Short summary"]';
 const deleteIcon = '[data-testid="icon:trash"]';
 const conformationWindow = '[data-testid="modal:confirm"]';
 const closeButtons = '[data-testid="icon:close"]';
+const message1 = "Are you sure you want to delete this issue?";
+const message2 = "Once you delete, it's gone for good.";
+
+function ConfirmationWindowActions(buttonTitle) {
+  cy.get(conformationWindow)
+    .should("be.visible")
+    .and("contain", message1)
+    .and("contain", message2)
+    .within(() => {
+      cy.contains("button", buttonTitle).click();
+    });
+  cy.get(conformationWindow).should("not.exist");
+}
+
+function BacklogAssertions(deletedIssueCount, firstIssueTitle) {
+  const initialIssueCount = Cypress.env("initialIssueCount");
+  cy.url().should("eq", `${Cypress.env("baseUrl")}project/board`);
+  cy.get(BackLogList)
+    .should("be.visible")
+    .and("have.length", "1")
+    .children()
+    .should("have.length", initialIssueCount - deletedIssueCount);
+  if (deletedIssueCount < 1) {
+    cy.get(BackLogList).should("contain", firstIssueTitle);
+  } else {
+    cy.get(BackLogList).should("not.contain", firstIssueTitle);
+  }
+}
 
 describe("Issue Deletion", () => {
   beforeEach(() => {
@@ -27,45 +55,34 @@ describe("Issue Deletion", () => {
   });
 
   it("Should delete the first issue in the backlog column", () => {
-    const initialIssueCount = Cypress.env("initialIssueCount");
+    let deletedIssueCount = 1;
+    let firstIssueTitle;
 
     cy.get(singleIssue).first().invoke("text").as("firstIssueTitle");
 
-    cy.get("@firstIssueTitle").then((firstIssueTitle) => {
+    cy.get("@firstIssueTitle").then((text) => {
+      firstIssueTitle = text;
       cy.get(singleIssue).first().click();
-
       cy.get(IssueDetailsModal).within(() => {
         cy.get(issueTitle).should("contain", firstIssueTitle);
         cy.log("First issue title is: " + firstIssueTitle);
         cy.get(deleteIcon).should("be.visible").click();
       });
 
-      cy.get(conformationWindow)
-        .should("be.visible")
-        .and("contain", "Are you sure you want to delete this issue?")
-        .and("contain", "Once you delete, it's gone for good.")
-        .within(() => {
-          cy.contains("button", "Delete issue").click();
-        });
-
-      cy.get(conformationWindow).should("not.exist");
+      ConfirmationWindowActions("Delete issue");
       cy.get(IssueDetailsModal).should("not.exist");
-      cy.url().should("eq", `${Cypress.env("baseUrl")}project/board`);
-      cy.get(BackLogList)
-        .should("be.visible")
-        .and("have.length", "1")
-        .children()
-        .should("have.length", initialIssueCount - 1)
-        .and("not.contain", firstIssueTitle);
+      BacklogAssertions(deletedIssueCount, firstIssueTitle);
     });
   });
 
   it("Should not delete the issue when user cancels its deletion", () => {
-    const initialIssueCount = Cypress.env("initialIssueCount");
+    let deletedIssueCount = 0;
+    let firstIssueTitle;
 
     cy.get(singleIssue).first().invoke("text").as("firstIssueTitle");
 
-    cy.get("@firstIssueTitle").then((firstIssueTitle) => {
+    cy.get("@firstIssueTitle").then((text) => {
+      firstIssueTitle = text;
       cy.get(singleIssue).first().click();
 
       cy.get(IssueDetailsModal).within(() => {
@@ -74,28 +91,15 @@ describe("Issue Deletion", () => {
         cy.get(deleteIcon).should("be.visible").click();
       });
 
-      cy.get(conformationWindow)
-        .should("be.visible")
-        .and("contain", "Are you sure you want to delete this issue?")
-        .and("contain", "Once you delete, it's gone for good.")
-        .within(() => {
-          cy.contains("button", "Cancel").click();
-        });
+      ConfirmationWindowActions("Cancel");
 
-      cy.get(conformationWindow).should("not.exist");
       cy.get(IssueDetailsModal)
         .should("be.visible")
         .and("contain", firstIssueTitle);
       cy.get(closeButtons).first().click();
 
       cy.get(IssueDetailsModal).should("not.exist");
-      cy.url().should("eq", `${Cypress.env("baseUrl")}project/board`);
-      cy.get(BackLogList)
-        .should("be.visible")
-        .and("have.length", "1")
-        .children()
-        .should("have.length", initialIssueCount)
-        .and("contain", firstIssueTitle);
+      BacklogAssertions(deletedIssueCount, firstIssueTitle);
     });
   });
 });
