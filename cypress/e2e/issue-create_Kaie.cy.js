@@ -1,8 +1,10 @@
 import { faker } from "@faker-js/faker";
-//Create issue data fields:
+
+//"Create issue" data fields:
 const description = ".ql-editor";
 const title = 'input[name="title"]';
 const issueType = '[data-testid="select:type"]';
+const issuePriority = '[data-testid="select:priority"]';
 const iconBug = '[data-testid="icon:bug"]';
 const iconTask = '[data-testid="icon:task"]';
 const SubmitButton = 'button[type="submit"]';
@@ -64,6 +66,9 @@ describe("Issue create", () => {
       cy.get('[data-testid="form-field:userIds"]').click();
       cy.get('[data-testid="select-option:Pickle Rick"]').click();
 
+      //Assert that issue priority is "Medium" by default
+      cy.get(issuePriority).should("contain", "Medium");
+
       // Click on button "Create issue"
       cy.get(SubmitButton).click();
     });
@@ -72,8 +77,7 @@ describe("Issue create", () => {
     cy.get(CreateIssueWindow).should("not.exist");
     cy.contains("Issue has been successfully created.").should("be.visible");
 
-    // Reload the page to be able to see recently created issue
-    // Assert that successful message has dissappeared after the reload
+    // Reload the page to be able to see recently created issue. Assert that successful message has dissappeared after the reload
     cy.reload().wait(30000);
     cy.contains("Issue has been successfully created.").should("not.exist");
 
@@ -138,7 +142,7 @@ describe("Issue create", () => {
       cy.get('[data-testid="select-option:Lord Gaben"]').click();
 
       //Select priority from dropdown
-      cy.get('[data-testid="select:priority"]').click();
+      cy.get(issuePriority).click();
       cy.get('[data-testid="select-option:High"]').click();
 
       // Click on button "Create issue"
@@ -206,7 +210,7 @@ describe("Issue create", () => {
       cy.get('[data-testid="select-option:Baby Yoda"]').click();
 
       //Select priority from dropdown
-      cy.get('[data-testid="select:priority"]').click();
+      cy.get(issuePriority).click();
       cy.get('[data-testid="select-option:Low"]').click();
 
       cy.get(issueType).then(($issueType) => {
