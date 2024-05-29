@@ -21,7 +21,6 @@ describe("Issue delete", () => {
   it("Should delete issue successfully", () => {
     //add steps to delete issue
     IssueModal.getIssueDetailModal().should("be.visible");
-    IssueModal.getIssueDetailModal();
     IssueModal.clickDeleteButton();
     IssueModal.confirmDeletion();
     IssueModal.validateIssueVisibilityState(issueTitle, (isVisible = !true));
@@ -31,7 +30,6 @@ describe("Issue delete", () => {
   it("Should cancel deletion process successfully", () => {
     //add steps to start deletion proces but cancel it
     IssueModal.getIssueDetailModal().should("be.visible");
-    IssueModal.getIssueDetailModal();
     IssueModal.clickDeleteButton();
     IssueModal.cancelDeletion();
     IssueModal.closeDetailModal();
