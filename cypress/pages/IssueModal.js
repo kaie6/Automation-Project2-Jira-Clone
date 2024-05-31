@@ -86,7 +86,7 @@ class IssueModal {
     cy.log(this.issueDetailModal);
     cy.get(this.backlogList)
       .should("be.visible")
-      .find(`[data-testid="list-issue"]`)
+      .find(this.issuesList)
       .should("not.contain", issueTitle);
   }
 
