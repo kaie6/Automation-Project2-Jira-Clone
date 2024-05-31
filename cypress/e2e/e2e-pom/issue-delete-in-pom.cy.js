@@ -39,5 +39,6 @@ describe("Issue delete", () => {
     IssueModal.closeDetailModal();
     IssueModal.validateIssueVisibilityState(issueTitle, (isVisible = true));
     IssueModal.ensureIssueIsVisibleOnBoard(issueTitle);
+    IssueModal.ensureIssueIsNotVisibleOnBoard(issueTitle);
   });
 });

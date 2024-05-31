@@ -84,8 +84,10 @@ class IssueModal {
     cy.get(this.issueDetailModal).should("not.exist");
     cy.reload();
     cy.log(this.issueDetailModal);
-    cy.log(issueTitle);
-    cy.contains(issueTitle, { timeout: 60000 }).should("not.exist");
+    cy.get(this.backlogList)
+      .should("be.visible")
+      .find(`[data-testid="list-issue"]`)
+      .should("not.contain", issueTitle);
   }
 
   validateIssueVisibilityState(issueTitle, isVisible = true) {
