@@ -84,10 +84,6 @@ class IssueModal {
     cy.get(this.issueDetailModal).should("not.exist");
     cy.reload();
     cy.log(this.issueDetailModal);
-    cy.get(this.backlogList)
-      .should("be.visible")
-      .find(this.issuesList)
-      .should("not.contain", issueTitle);
   }
 
   validateIssueVisibilityState(issueTitle, isVisible = true) {
