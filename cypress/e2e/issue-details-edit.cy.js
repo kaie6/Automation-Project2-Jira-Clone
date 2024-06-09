@@ -1,6 +1,9 @@
 describe("Issue details editing", () => {
   const getIssueDetailsModal = () =>
     cy.get('[data-testid="modal:issue-details"]');
+  const priorityDropdown = '[data-testid="select:priority"]';
+  const reporterDropdown = '[data-testid="select:reporter"]';
+  const onlyCharactersRegex = /^[A-Za-z\s]+$/;
 
   beforeEach(() => {
     cy.visit("/");
@@ -34,16 +37,13 @@ describe("Issue details editing", () => {
         "Lord Gaben"
       );
 
-      cy.get('[data-testid="select:reporter"]').click("bottomRight");
+      cy.get(reporterDropdown).click("bottomRight");
       cy.get('[data-testid="select-option:Pickle Rick"]').click();
-      cy.get('[data-testid="select:reporter"]').should(
-        "have.text",
-        "Pickle Rick"
-      );
+      cy.get(reporterDropdown).should("have.text", "Pickle Rick");
 
-      cy.get('[data-testid="select:priority"]').click("bottomRight");
+      cy.get(priorityDropdown).click("bottomRight");
       cy.get('[data-testid="select-option:Medium"]').click();
-      cy.get('[data-testid="select:priority"]').should("have.text", "Medium");
+      cy.get(priorityDropdown).should("have.text", "Medium");
     });
   });
 
@@ -71,8 +71,55 @@ describe("Issue details editing", () => {
     });
   });
 
-  it('Should check the "Priority" dropdown', () => {
+  it.only('Should check the "Priority" dropdown values', () => {
     const expectedLength = 5;
-    const priorityOptions = [""];
+    const priorityOptions = [];
+
+    getIssueDetailsModal().within(() => {
+      cy.get(priorityDropdown)
+        .invoke("text")
+        .then((text) => {
+          //push the selected priority value to the empty array
+          priorityOptions.unshift(text);
+          cy.log(priorityOptions[0], priorityOptions.length);
+        });
+
+      cy.get(priorityDropdown).click("bottomRight");
+      //Choosing the selector to access all options from the dropdown and looping through the elements
+      cy.get('[data-testid*="select-option:"]')
+        .each(($option) => {
+          const priorityText = $option.text().trim();
+          //saving the text value of the element to the existing array
+          priorityOptions.push(priorityText);
+          cy.log(
+            `Added priority: ${priorityText}. Current array length: ${priorityOptions.length}`
+          );
+        })
+        .then(() => {
+          //Asserting that the created array has the expected length
+          expect(priorityOptions.length).to.equal(expectedLength);
+          cy.log(
+            "These are Priority dropdown menu options: " + priorityOptions
+          );
+          cy.log(
+            "This is the amount of options in the Priorities dropdown menu: " +
+              priorityOptions.length
+          );
+        });
+    });
+  });
+
+  it.only("Should check that the reporter name only has characters in it", () => {
+    cy.get(reporterDropdown).then(($option) => {
+      const reporterName = $option.text().trim();
+      cy.log(reporterName);
+      // Assert that the name matches the regular expression pattern
+      const isOnlyCharacters = onlyCharactersRegex.test(reporterName);
+      cy.log(
+        `Reporter name '${reporterName}' contains only characters: ${isOnlyCharacters}`
+      );
+      // Assert that the name contains only characters
+      expect(isOnlyCharacters).to.be.true;
+    });
   });
 });

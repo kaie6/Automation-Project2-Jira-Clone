@@ -285,4 +285,23 @@ describe("Issue create", () => {
         .and("contain", "This field is required");
     });
   });
+
+  it.only("Should verify that the application is removing unnecessary spaces on the board view", () => {
+    const titleName = "   This  is  a  test";
+
+    cy.get(title).type(titleName);
+    cy.get(SubmitButton).click();
+
+    cy.get(CreateIssueWindow).should("not.exist");
+    cy.contains(successMessage).should("be.visible");
+    cy.reload().wait(30000);
+    cy.contains(successMessage).should("not.exist");
+
+    cy.get(BackLogList)
+      .should("be.visible")
+      .and("have.length", "1")
+      .within(() => {
+        cy.get(issueList).first().should("have.text", titleName.trim());
+      });
+  });
 });
